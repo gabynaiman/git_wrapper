@@ -17,7 +17,7 @@ module GitWrapper
       end
 
       def result
-        return @success if @value.present? || !@success
+        return @success if @value || !@success
         @output[0..(@output.length - 2)].strip
       end
 
