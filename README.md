@@ -16,9 +16,54 @@ Or install it yourself as:
 
     $ gem install git_wrapper
 
+## Requirments
+
+    Git client must be installed and inculded in system path
+
 ## Usage
 
-TODO: Write usage instructions here
+### Example
+
+    repo = Repository.new(folder_name)
+
+    repo.init
+    # or
+    repo.init_bare
+
+    repo.add 'file_name'
+    # or
+    repo.add_all
+
+    repo.status
+
+    repo.commit 'message'
+
+    repo.add_remote 'origin', 'git@localhost:repo.git'
+
+    repo.push 'origin', 'master'
+
+### Supported commands
+
+- Add
+- Branch
+- Checkout
+- Commit
+- Config
+- Diff
+- Fecht
+- Init
+- Log
+- Merge
+- Pull
+- Push
+- Remote
+- Remove
+- Reset
+- Revert
+- Show
+- Status
+- Tag
+
 
 ## Contributing
 
