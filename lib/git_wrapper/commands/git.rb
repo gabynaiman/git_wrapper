@@ -24,6 +24,7 @@ module GitWrapper
 
           return result
         rescue Exception => e
+          GitWrapper.logger.error "[GitWrapper] #{e.message}"
           @error = e.message
           return false
         end
