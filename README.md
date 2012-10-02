@@ -1,6 +1,6 @@
 # GitWrapper
 
-TODO: Write a gem description
+OO git command line wrapper
 
 ## Installation
 
