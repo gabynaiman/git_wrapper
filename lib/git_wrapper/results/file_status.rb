@@ -6,7 +6,8 @@ module GitWrapper
           'M' => :modified,
           'D' => :deleted,
           'R' => :renamed,
-          'U' => :merge_conflict,
+          'UU' => :merge_conflict,
+          'AA' => :merge_conflict,
           'C' => :copied,
           'T' => :type_changed,
           'X' => :unknown

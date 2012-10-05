@@ -56,8 +56,17 @@ describe GitWrapper, '-> Status porcelain parser' do
     file_status.staged_for_commit.should be_true
   end
 
-  it 'Merge conflict' do
+  it 'Merge conflict (UU)' do
     text = 'UU file.txt'
+    file_status = StatusPorcelain.parse(text)
+
+    file_status.file_name.should eq('file.txt')
+    file_status.status.should be(:merge_conflict)
+    file_status.staged_for_commit.should be_false
+  end
+
+  it 'Merge conflict (AA)' do
+    text = 'AA file.txt'
     file_status = StatusPorcelain.parse(text)
 
     file_status.file_name.should eq('file.txt')

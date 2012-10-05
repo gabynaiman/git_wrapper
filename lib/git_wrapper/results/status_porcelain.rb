@@ -28,7 +28,7 @@ module GitWrapper
       end
 
       def self.parse_status(text)
-        FileStatus.value_of text[0..2].strip[0]
+        FileStatus.value_of text[0..2].strip
       end
 
       def self.parse_staged_for_commit(text)
