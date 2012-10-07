@@ -386,6 +386,9 @@ describe GitWrapper, '-> Repository' do
   it 'Get a current branch' do
     repo = Repository.new(@file_helper.create_temp_folder)
     repo.init
+
+    repo.current_branch.should eq('master')
+
     @file_helper.create_temp_file(repo.location, 'test')
     repo.add_all
     repo.commit('first commit')

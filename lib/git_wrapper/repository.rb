@@ -110,7 +110,8 @@ module GitWrapper
     end
 
     def current_branch
-      execute(Commands::Branch.new(@location).current)
+      branch = execute(Commands::Branch.new(@location).current)
+      branch.nil? ? 'master' : branch
     end
 
     def branch(name, commit=nil)
