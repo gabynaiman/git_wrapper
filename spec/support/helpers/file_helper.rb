@@ -7,9 +7,9 @@ class FileHelper
   end
 
   def create_temp_folder
-    folder_name = "#{ENV['TMP'].gsub('\\', '/')}/#{timestamp}"
+    folder_name = "#{temp_path}/#{timestamp}"
     @temp_folders << folder_name
-    Dir.mkdir folder_name
+    FileUtils.mkpath folder_name
     folder_name
   end
 
@@ -29,6 +29,10 @@ class FileHelper
   end
 
   private
+
+  def temp_path
+    Pathname.new("#{File.dirname(__FILE__)}/../../tmp").expand_path.to_s
+  end
 
   def timestamp
     (Time.now.to_f * 1000).to_i
