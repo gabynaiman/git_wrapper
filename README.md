@@ -1,5 +1,10 @@
 # GitWrapper
 
+[![Build Status](https://travis-ci.org/gabynaiman/git_wrapper.png?branch=master)](https://travis-ci.org/gabynaiman/git_wrapper)
+[![Coverage Status](https://coveralls.io/repos/gabynaiman/git_wrapper/badge.png?branch=master)](https://coveralls.io/r/gabynaiman/git_wrapper?branch=master)
+[![Code Climate](https://codeclimate.com/github/gabynaiman/git_wrapper.png)](https://codeclimate.com/github/gabynaiman/git_wrapper)
+[![Dependency Status](https://gemnasium.com/gabynaiman/git_wrapper.png)](https://gemnasium.com/gabynaiman/git_wrapper)
+
 OO git command line wrapper
 
 ## Installation

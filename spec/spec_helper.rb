@@ -1,3 +1,4 @@
+require 'coverage_helper'
 require 'git_wrapper'
 
 include GitWrapper

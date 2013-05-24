@@ -31,7 +31,7 @@ class FileHelper
   private
 
   def temp_path
-    Pathname.new("#{File.dirname(__FILE__)}/../../tmp").expand_path.to_s
+    Pathname.new("#{File.dirname(__FILE__)}/../../../tmp").expand_path.to_s
   end
 
   def timestamp
