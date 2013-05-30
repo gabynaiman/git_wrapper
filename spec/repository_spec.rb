@@ -333,6 +333,83 @@ describe GitWrapper, '-> Repository' do
     log.parents.last.should eq second_commit.commit_hash
   end
 
+  it 'Show commit logs by author' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    @file_helper.create_temp_file(repo.location, 'test')
+    @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+
+    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+
+    repo.log(:author => 'another_name').should have(0).items
+    repo.log(:author => 'Another_author').should have(1).items
+    repo.log(:author => 'another_author@mail.com').should have(1).items
+  end
+
+  it 'Show commit logs by until' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    @file_helper.create_temp_file(repo.location, 'test')
+    @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+
+    repo.commit 'first_commit'
+
+    repo.log(:until => yesterday).should have(0).items
+    repo.log(:until => tomorrow).should have(1).items
+  end
+
+  it 'Show commit logs by since' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    @file_helper.create_temp_file(repo.location, 'test')
+    @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+
+    repo.commit 'first_commit'
+
+    repo.log(:since => tomorrow).should have(0).items
+    repo.log(:since => yesterday).should have(1).items
+  end
+
+  it 'Show commit logs by grep' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    @file_helper.create_temp_file(repo.location, 'test')
+    @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+
+    repo.commit 'first_commit'
+
+    repo.log(:grep => 'second_commit').should have(0).items
+    repo.log(:grep => 'FirsT_commit').should have(1).items
+    repo.log(:grep => 'first').should have(1).items
+  end
+
+  it 'Show commit logs by author since until grep' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    @file_helper.create_temp_file(repo.location, 'test')
+    @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+
+    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+
+    repo.log(:author => 'another_author', :since => yesterday, :until => yesterday, :grep => 'first_commit' ).should have(0).items
+    repo.log(:author => 'another_author', :since => yesterday, :until => tomorrow, :grep => 'first_commit' ).should have(1).items
+  end
+
   it 'Show existent branches' do
     origin = Repository.new(@file_helper.create_temp_folder)
     origin.init_bare
@@ -661,6 +738,47 @@ describe GitWrapper, '-> Repository' do
     diff_reverse.select { |d| d.file_name == File.basename(file2) }.first.status.should be(:modified)
     diff_reverse.select { |d| d.file_name == File.basename(file3) }.should be_empty
     diff_reverse.select { |d| d.file_name == File.basename(file4) }.first.status.should be(:new_file)
+  end
+
+  it 'Diff tree file status for commits' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    file_name1 = @file_helper.create_temp_file(repo.location, 'test')
+    file_name2 = @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+
+    File.open(file_name1, 'w') { |f| f.puts 'test 2' }
+    File.open(file_name2, 'w') { |f| f.puts 'test 2' }
+
+    repo.add_all
+    repo.commit('second commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+
+    File.open(file_name1, 'w') { |f| f.puts 'test 3' }
+    File.delete file_name2
+    file_name3 = @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+    repo.commit('third commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+
+    log = repo.log(:author => 'another_author')
+
+    diff = repo.diff_tree log[0].commit_hash
+    diff.should have(3).items
+    diff.select { |d| d.file_name == File.basename(file_name1) }.first.status.should be :modified
+    diff.select { |d| d.file_name == File.basename(file_name2) }.first.status.should be :deleted
+    diff.select { |d| d.file_name == File.basename(file_name3) }.first.status.should be :new_file
+
+    diff = repo.diff_tree log[1].commit_hash
+    diff.should have(2).items
+    diff.select { |d| d.file_name == File.basename(file_name1) }.first.status.should be :modified
+    diff.select { |d| d.file_name == File.basename(file_name2) }.first.status.should be :modified
+    diff.select { |d| d.file_name == File.basename(file_name3) }.should be_empty
+
+    diff = repo.diff_tree log[2].commit_hash
+    diff.should have(0).items
   end
 
   it 'Revert a specific commit' do

@@ -1,6 +1,7 @@
 module GitWrapper
   module Commands
     class Log < Git
+
       ATTRIBUTES = {
           :commit_hash => 'H',
           :abbreviated_commit_hash => 'h',
@@ -38,8 +39,8 @@ module GitWrapper
           :reflog_subject => 'gs'
       }
 
-      def file(file_name)
-        @file = to_relative_path(file_name)
+      def file_name(file_name)
+        @file_name = to_relative_path(file_name)
         self
       end
 
@@ -48,25 +49,45 @@ module GitWrapper
         self
       end
 
+      def author(author)
+        @author = author
+        self
+      end
+
+      def grep(grep)
+        @grep = grep
+        self
+      end
+
+      def since(since)
+        @since = since
+        self
+      end
+
+      def until(until_par)
+        @until = until_par
+        self
+      end
+
       def command
-        command = "log --format=\"<log>#{xml_structure}</log>\""
+        command = "log -i --format=\"<log>#{xml_structure}</log>\""
         command += " #{@commit}" if @commit
-        command += " \"#{@file}\"" if @file
+        command += " \"#{@file_name}\"" if @file_name
+        command += " --author \"#{@author}\"" if @author
+        command += " --since \"#{@since}\"" if @since
+        command += " --until \"#{@until}\"" if @until
+        command += " --grep \"#{@grep}\"" if @grep
         command
       end
 
       def result
-        if output.nil?
-          return nil if @commit
-          return []
+        results = []
+        if output
+          results = Nokogiri::XML("<logs>#{output}</logs>").xpath('logs/log').map do |element|
+            Results::LogInfo.new(Hash[*element.children.flat_map { |node| [node.name.to_sym, node.text] }])
+          end
         end
-
-        results = Nokogiri::XML("<logs>#{output}</logs>").xpath('logs/log').map do |element|
-          Results::LogInfo.new(Hash[*element.children.map { |node| [node.name.to_sym, node.text] }.flatten])
-        end
-
-        return results.first if @commit
-        results
+        @commit ? results.first : results
       end
 
       private

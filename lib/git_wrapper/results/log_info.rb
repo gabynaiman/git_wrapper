@@ -1,9 +1,14 @@
 module GitWrapper
   module Results
     class LogInfo
+
       def initialize(attributes)
-        attributes.each do |name, value|
-          define_singleton_method name, lambda { value }
+        @attributes = attributes
+      end
+
+      Commands::Log::ATTRIBUTES.keys.each do |name|
+        define_method name do
+          @attributes[name]
         end
       end
 

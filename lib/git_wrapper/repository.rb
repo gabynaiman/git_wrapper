@@ -96,13 +96,11 @@ module GitWrapper
     end
 
     def log(options={})
-      if options[:file_name]
-        execute(Commands::Log.new(@location).file(options[:file_name]))
-      elsif options[:commit]
-        execute(Commands::Log.new(@location).commit(options[:commit]))
-      else
-        execute(Commands::Log.new(@location))
+      command = Commands::Log.new(@location)
+      options.each do |option, value|
+        command.send option, value
       end
+      execute(command)
     end
 
     def branches
@@ -172,6 +170,10 @@ module GitWrapper
 
     def diff_reverse(commit)
       execute(Commands::Diff.new(@location).with(commit).reverse)
+    end
+
+    def diff_tree(commit)
+      execute(Commands::DiffTree.new(@location).commit(commit))
     end
 
     def revert(commit)
