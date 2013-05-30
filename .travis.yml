@@ -3,3 +3,6 @@ rvm:
   - 1.9.3
   - 2.0
   - jruby
+before_script
+  - git config --global user.name "User Name"
+  - git config --global user.email "user@mail.com"
