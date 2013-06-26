@@ -117,12 +117,12 @@ describe GitWrapper, '-> Repository' do
     repo.commit('comment').should be_false
   end
 
-  it 'Commt in name of another user' do
+  it 'Commit in name of another user' do
     repo = Repository.new(@file_helper.create_temp_folder)
     repo.init
     @file_helper.create_temp_file(repo.location, 'test')
     repo.add_all
-    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com').should be_true
+    repo.commit('first_commit', author_name: 'another_author', author_email: 'another_author@mail.com').should be_true
 
     log = repo.log.first
     log.author_name.should eq 'another_author'
@@ -255,7 +255,7 @@ describe GitWrapper, '-> Repository' do
     my_repo.show_theirs(File.basename(my_file)).should eq("version theirs\n")
   end
 
-  it 'Show file from differente versions' do
+  it 'Show file from different versions' do
     repo = Repository.new(@file_helper.create_temp_folder)
     repo.init
 
@@ -298,8 +298,8 @@ describe GitWrapper, '-> Repository' do
     repo.add_all
     repo.commit('second commit')
 
-    repo.log(:file_name => File.basename(file_name1)).should have(2).items
-    repo.log(:file_name => File.basename(file_name2)).should have(1).items
+    repo.log(files: [File.basename(file_name1)]).should have(2).items
+    repo.log(files: [File.basename(file_name2)]).should have(1).items
   end
 
   it 'Show merge logs' do
@@ -333,6 +333,44 @@ describe GitWrapper, '-> Repository' do
     log.parents.last.should eq second_commit.commit_hash
   end
 
+  it 'Show logs by files' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    file_name1 = @file_helper.create_temp_file(repo.location, 'test')
+    file_name2 = @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+    repo.commit('first commit')
+
+    file_name3 = @file_helper.create_temp_file(repo.location, 'test')
+    File.open(file_name1, 'w') { |f| f.puts 'test 2' }
+
+    repo.add_all
+    repo.commit('second commit')
+
+    File.open(file_name3, 'w') { |f| f.puts 'test 2' }
+
+    repo.add_all
+    repo.commit('third commit')
+
+    files = [file_name1, file_name2, file_name3].map { |f| File.basename(f) }
+
+    repo.log(files: files).should have(3).items
+
+    files = [file_name1, file_name2].map { |f| File.basename(f) }
+
+    repo.log(files: files).should have(2).items
+    repo.log(files: []).should have(3).items
+    repo.log(files: nil).should have(3).items
+
+    repo.log.should have(3).items
+
+    files = [file_name1, 'non_exist_file.txt'].map { |f| File.basename(f) }
+
+    repo.log(files: files).should be_nil
+  end
+
   it 'Show commit logs by author' do
     repo = Repository.new(@file_helper.create_temp_folder)
     repo.init
@@ -342,11 +380,13 @@ describe GitWrapper, '-> Repository' do
 
     repo.add_all
 
-    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+    repo.commit('first_commit', author_name: 'author_name', author_email: 'author_name@mail.com')
 
-    repo.log(:author => 'another_name').should have(0).items
-    repo.log(:author => 'Another_author').should have(1).items
-    repo.log(:author => 'another_author@mail.com').should have(1).items
+    repo.log(author: 'another_name').should have(0).items
+    repo.log(author: 'Author_name').should have(1).items
+    repo.log(author: 'author_name@mail.com').should have(1).items
+    repo.log(author: '').should have(1).items
+    repo.log(author: nil).should have(1).items
   end
 
   it 'Show commit logs by until' do
@@ -355,13 +395,15 @@ describe GitWrapper, '-> Repository' do
 
     @file_helper.create_temp_file(repo.location, 'test')
     @file_helper.create_temp_file(repo.location, 'test')
-
     repo.add_all
-
     repo.commit 'first_commit'
 
-    repo.log(:until => yesterday).should have(0).items
-    repo.log(:until => tomorrow).should have(1).items
+    repo.log(until: yesterday).should have(0).items
+    repo.log(until: today).should have(0).items
+    repo.log(until: now).should have(1).items
+    repo.log(until: tomorrow).should have(1).items
+    repo.log(until: '').should have(1).items
+    repo.log(until: nil).should have(1).items
   end
 
   it 'Show commit logs by since' do
@@ -370,13 +412,17 @@ describe GitWrapper, '-> Repository' do
 
     @file_helper.create_temp_file(repo.location, 'test')
     @file_helper.create_temp_file(repo.location, 'test')
-
     repo.add_all
-
     repo.commit 'first_commit'
 
-    repo.log(:since => tomorrow).should have(0).items
-    repo.log(:since => yesterday).should have(1).items
+    repo.log(since: next_hour).should have(0).items
+    repo.log(since: tomorrow).should have(0).items
+    repo.log(since: next_month).should have(0).items
+    repo.log(since: next_year).should have(0).items
+    repo.log(since: today).should have(1).items
+    repo.log(since: yesterday).should have(1).items
+    repo.log(since: '').should have(1).items
+    repo.log(since: nil).should have(1).items
   end
 
   it 'Show commit logs by grep' do
@@ -385,29 +431,214 @@ describe GitWrapper, '-> Repository' do
 
     @file_helper.create_temp_file(repo.location, 'test')
     @file_helper.create_temp_file(repo.location, 'test')
-
     repo.add_all
-
     repo.commit 'first_commit'
 
-    repo.log(:grep => 'second_commit').should have(0).items
-    repo.log(:grep => 'FirsT_commit').should have(1).items
-    repo.log(:grep => 'first').should have(1).items
+    repo.log(grep: 'second_commit').should have(0).items
+    repo.log(grep: 'FirsT_commit').should have(1).items
+    repo.log(grep: 'first').should have(1).items
+    repo.log(grep: '').should have(1).items
+    repo.log(grep: nil).should have(1).items
   end
 
-  it 'Show commit logs by author since until grep' do
+  it 'Show commit logs by author, since, until, grep and files' do
     repo = Repository.new(@file_helper.create_temp_folder)
     repo.init
 
-    @file_helper.create_temp_file(repo.location, 'test')
-    @file_helper.create_temp_file(repo.location, 'test')
+    file_name1 = @file_helper.create_temp_file(repo.location, 'test')
+    file_name2 = @file_helper.create_temp_file(repo.location, 'test')
+    repo.add_all
+    repo.commit('first_commit', author_name: 'author_name', author_email: 'author_name@mail.com')
+
+    files = [file_name1, file_name2].map { |f| File.basename(f) }
+
+    repo.log(author: 'author_name', since: yesterday, until: yesterday, grep: 'first_commit', files: files).should have(0).items
+    repo.log(author: 'author_name', since: yesterday, until: tomorrow, grep: 'first_commit', files: files).should have(1).items
+  end
+
+  it 'Show paginate logs' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    20.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit 'commit_' + i.to_s
+    end
+
+    repo.log.should have(20).items
+    repo.log(max_count: 5).map(&:subject).should eq (15..19).map{ |i| "commit_#{i}" }.reverse
+    repo.log(skip: 2).first.subject.should eq 'commit_17'
+    repo.log(skip: 2, max_count: 5).map(&:subject).should eq (13..17).map{ |i| "commit_#{i}" }.reverse
+  end
+
+  it 'Rev List' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    2.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit "Commit #{i}"
+    end
+
+    repo.rev_list.should have(2).items
+    2.times { |i| repo.rev_list[i].should eq repo.log[i].commit_hash }
+  end
+
+  it 'Rev List count' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    2.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit "Commit #{i}"
+
+      repo.rev_list_count.should eq i+1
+      repo.rev_list_count(grep: "Commit #{i}").should eq 1
+    end
+
+  end
+
+  it 'Rev List by author' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    2.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit( "Commit #{i}", author_name: 'author_name', author_email: 'author_name@mail.com' )
+    end
+
+    repo.rev_list(author: 'author_name').should have(2).items
+    2.times { |i| repo.rev_list(author: 'author_name')[i].should eq repo.log[i].commit_hash }
+
+    repo.log(author: 'Author_name').should have(2).items
+    repo.log(author: 'author_name@mail.com').should have(2).items
+    repo.log(author: '').should have(2).items
+    repo.log(author: nil).should have(2).items
+    repo.log(author: 'another_name').should have(0).items
+  end
+
+  it 'Rev List by since' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    2.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit "Commit #{i}"
+    end
+
+    repo.rev_list(since: today).should have(2).items
+    2.times { |i| repo.rev_list(since: today)[i].should eq repo.log(since: today)[i].commit_hash }
+
+    repo.log(since: next_hour).should have(0).items
+    repo.log(since: tomorrow).should have(0).items
+    repo.log(since: next_month).should have(0).items
+    repo.log(since: next_year).should have(0).items
+    repo.log(since: yesterday).should have(2).items
+    repo.log(since: '').should have(2).items
+    repo.log(since: nil).should have(2).items
+  end
+
+  it 'Rev List by until' do
+
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    2.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit "Commit #{i}"
+    end
+
+    repo.rev_list(until: now).should have(2).items
+    2.times { |i| repo.rev_list(until: now)[i].should eq repo.log(until: now)[i].commit_hash }
+
+    repo.log(until: yesterday).should have(0).items
+    repo.log(until: today).should have(0).items
+    repo.log(until: tomorrow).should have(2).items
+    repo.log(until: '').should have(2).items
+    repo.log(until: nil).should have(2).items
+  end
+
+  it 'Rev List by grep' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    2.times do |i|
+      @file_helper.create_temp_file(repo.location, 'test')
+      repo.add_all
+      repo.commit "Commit #{i}"
+    end
+
+    commits = repo.rev_list(grep: 'Commit 1')
+    commits.should have(1).items
+    commits.first.should eq repo.log(grep: 'Commit 1').first.commit_hash
+
+    repo.rev_list(grep: 'CoMMiT 1').should have(1).items
+    repo.rev_list(grep: 'Commit 2').should have(0).items
+    repo.rev_list(grep: 'Comm').should have(2).items
+    repo.rev_list(grep: '').should have(2).items
+    repo.rev_list(grep: nil).should have(2).items
+
+  end
+
+  it 'Rev List by files' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    file_name1 = @file_helper.create_temp_file(repo.location, 'test')
+    file_name2 = @file_helper.create_temp_file(repo.location, 'test')
 
     repo.add_all
+    repo.commit('first commit')
 
-    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+    file_name3 = @file_helper.create_temp_file(repo.location, 'test')
+    File.open(file_name1, 'w') { |f| f.puts 'test 2' }
 
-    repo.log(:author => 'another_author', :since => yesterday, :until => yesterday, :grep => 'first_commit' ).should have(0).items
-    repo.log(:author => 'another_author', :since => yesterday, :until => tomorrow, :grep => 'first_commit' ).should have(1).items
+    repo.add_all
+    repo.commit('second commit')
+
+    File.open(file_name3, 'w') { |f| f.puts 'test 2' }
+
+    repo.add_all
+    repo.commit('third commit')
+
+    files = [file_name1, file_name2, file_name3].map { |f| File.basename(f) }
+
+    repo.rev_list(files: files).should have(3).items
+    3.times { |i| repo.rev_list(files: files)[i].should eq repo.log(files: files)[i].commit_hash }
+
+    files = [file_name1, file_name2].map { |f| File.basename(f) }
+
+    repo.rev_list(files: files).should have(2).items
+    repo.rev_list(files: []).should have(3).items
+    repo.rev_list(files: nil).should have(3).items
+
+    repo.rev_list.should have(3).items
+
+    files = [file_name1, 'non_exist_file.txt'].map { |f| File.basename(f) }
+
+    repo.rev_list(files: files).should be_nil
+  end
+
+  it 'Rev List bt author, since, until, grep and files' do
+    repo = Repository.new(@file_helper.create_temp_folder)
+    repo.init
+
+    file_name1 = @file_helper.create_temp_file(repo.location, 'test')
+    file_name2 = @file_helper.create_temp_file(repo.location, 'test')
+
+    repo.add_all
+    repo.commit('first_commit', author_name: 'author_name', author_email: 'author_name@mail.com')
+
+    files = [file_name1, file_name2].map { |f| File.basename(f) }
+
+    repo.rev_list(author: 'author_name', since: yesterday, until: yesterday, grep: 'first_commit', files: files).should have(0).items
+    repo.rev_list(author: 'author_name', since: yesterday, until: tomorrow, grep: 'first_commit', files: files).should have(1).items
   end
 
   it 'Show existent branches' do
@@ -748,22 +979,22 @@ describe GitWrapper, '-> Repository' do
     file_name2 = @file_helper.create_temp_file(repo.location, 'test')
 
     repo.add_all
-    repo.commit('first_commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+    repo.commit('first_commit', author_name: 'another_author', author_email: 'another_author@mail.com')
 
     File.open(file_name1, 'w') { |f| f.puts 'test 2' }
     File.open(file_name2, 'w') { |f| f.puts 'test 2' }
 
     repo.add_all
-    repo.commit('second commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+    repo.commit('second commit', author_name: 'another_author', author_email: 'another_author@mail.com')
 
     File.open(file_name1, 'w') { |f| f.puts 'test 3' }
     File.delete file_name2
     file_name3 = @file_helper.create_temp_file(repo.location, 'test')
 
     repo.add_all
-    repo.commit('third commit', :author_name => 'another_author', :author_email => 'another_author@mail.com')
+    repo.commit('third commit', author_name: 'another_author', author_email: 'another_author@mail.com')
 
-    log = repo.log(:author => 'another_author')
+    log = repo.log(author: 'another_author')
 
     diff = repo.diff_tree log[0].commit_hash
     diff.should have(3).items
@@ -897,7 +1128,7 @@ describe GitWrapper, '-> Repository' do
     repo.status.should have(1).items
     repo.status.first.should be_git_new_file(File.basename(file2))
 
-    repo.reset(:mode => :hard).should be_true
+    repo.reset(mode: :hard).should be_true
 
     File.exist?(file1).should be_true
     File.exist?(file2).should be_false
@@ -929,7 +1160,7 @@ describe GitWrapper, '-> Repository' do
     repo.log.should have(2).items
     repo.log.first.subject.should eq 'second commit'
 
-    repo.reset(:commit => repo.log.last.commit_hash).should be_true
+    repo.reset(commit: repo.log.last.commit_hash).should be_true
 
     File.exist?(file1).should be_true
     File.exist?(file2).should be_true
@@ -968,7 +1199,7 @@ describe GitWrapper, '-> Repository' do
     repo.log.should have(2).items
     repo.log.first.subject.should eq 'second commit'
 
-    repo.reset(:mode => :hard, :commit => repo.log.last.commit_hash).should be_true
+    repo.reset(mode: :hard, commit: repo.log.last.commit_hash).should be_true
 
     File.exist?(file1).should be_true
     File.exist?(file2).should be_false

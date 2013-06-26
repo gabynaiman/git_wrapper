@@ -30,9 +30,15 @@ module GitWrapper
         end
       end
 
+      def success?
+        @success
+      end
+
       def result
         @success
       end
+
+      private
 
       def to_relative_path(file_name)
         base_folder = location_folder.gsub("\\", "/")

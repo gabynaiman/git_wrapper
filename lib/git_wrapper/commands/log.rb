@@ -39,8 +39,8 @@ module GitWrapper
           :reflog_subject => 'gs'
       }
 
-      def file_name(file_name)
-        @file_name = to_relative_path(file_name)
+      def files(files)
+        @files = files.map{|f|to_relative_path(f)}
         self
       end
 
@@ -59,28 +59,42 @@ module GitWrapper
         self
       end
 
-      def since(since)
-        @since = since
+      def since(date)
+        @since = date
         self
       end
 
-      def until(until_par)
-        @until = until_par
+      def until(date)
+        @until = date
+        self
+      end
+
+      def skip(skip)
+        @skip = skip
+        self
+      end
+
+      def max_count(max_count)
+        @max_count = max_count
         self
       end
 
       def command
         command = "log -i --format=\"<log>#{xml_structure}</log>\""
         command += " #{@commit}" if @commit
-        command += " \"#{@file_name}\"" if @file_name
         command += " --author \"#{@author}\"" if @author
         command += " --since \"#{@since}\"" if @since
         command += " --until \"#{@until}\"" if @until
         command += " --grep \"#{@grep}\"" if @grep
+        command += " --skip #{@skip}" if @skip
+        command += " --max-count \"#{@max_count}\"" if @max_count
+        command += " #{@files.map{|f| "\"#{f}\"" }.join(' ')}" if @files
         command
       end
 
       def result
+        return nil unless success?
+
         results = []
         if output
           results = Nokogiri::XML("<logs>#{output}</logs>").xpath('logs/log').map do |element|

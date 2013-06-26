@@ -98,7 +98,23 @@ module GitWrapper
     def log(options={})
       command = Commands::Log.new(@location)
       options.each do |option, value|
-        command.send option, value
+        command.send option, value if value && !value.to_s.strip.empty?
+      end
+      execute(command)
+    end
+
+    def rev_list(options={})
+      command = Commands::RevList.new(@location)
+      options.each do |option, value|
+        command.send option, value if value && !value.to_s.strip.empty?
+      end
+      execute(command)
+    end
+
+    def rev_list_count(options={})
+      command = Commands::RevList.new(@location).count
+      options.each do |option, value|
+        command.send option, value if value && !value.to_s.strip.empty?
       end
       execute(command)
     end

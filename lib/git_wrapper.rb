@@ -29,6 +29,7 @@ require 'git_wrapper/commands/diff_tree'
 require 'git_wrapper/commands/revert'
 require 'git_wrapper/commands/reset'
 require 'git_wrapper/commands/config'
+require 'git_wrapper/commands/rev_list'
 
 require 'git_wrapper/results/file_status'
 require 'git_wrapper/results/status_porcelain'
