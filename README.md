@@ -6,7 +6,7 @@
 [![Code Climate](https://codeclimate.com/github/gabynaiman/git_wrapper.png)](https://codeclimate.com/github/gabynaiman/git_wrapper)
 [![Dependency Status](https://gemnasium.com/gabynaiman/git_wrapper.png)](https://gemnasium.com/gabynaiman/git_wrapper)
 
-OO git command line wrapper
+Object Oriented git command line wrapper
 
 ## Installation
 
