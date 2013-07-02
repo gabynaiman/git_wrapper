@@ -11,6 +11,8 @@ module GitWrapper
         end
       end
 
+      private
+
       def self.ruby_execute(command, options={})
         location_folder = options[:chdir] || '.'
         result = nil
