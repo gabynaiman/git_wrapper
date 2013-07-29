@@ -1009,7 +1009,9 @@ describe GitWrapper, '-> Repository' do
     diff.select { |d| d.file_name == File.basename(file_name3) }.should be_empty
 
     diff = repo.diff_tree log[2].commit_hash
-    diff.should have(0).items
+    diff.should have(2).items
+    diff.select { |d| d.file_name == File.basename(file_name1) }.first.status.should be :new_file
+    diff.select { |d| d.file_name == File.basename(file_name2) }.first.status.should be :new_file
   end
 
   it 'Revert a specific commit' do

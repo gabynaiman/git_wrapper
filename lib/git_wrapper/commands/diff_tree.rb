@@ -8,7 +8,7 @@ module GitWrapper
       end
 
       def command
-        "diff-tree #{@commit} -r --name-status"
+        "diff-tree #{@commit} -r --name-status --root"
       end
 
       def result
