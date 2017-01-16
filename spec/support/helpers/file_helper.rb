@@ -1,5 +1,3 @@
-require 'fileutils'
-
 class FileHelper
 
   def initialize

@@ -2,6 +2,7 @@ require 'logger'
 require 'nokogiri'
 require 'open3'
 require 'pathname'
+require 'fileutils'
 
 require 'git_wrapper/version'
 
