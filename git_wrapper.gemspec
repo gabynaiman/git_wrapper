@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'coveralls', '~> 0.8'
 
   if RUBY_VERSION < '2'
+    s.add_development_dependency 'term-ansicolor', '~> 1.3.0'
     s.add_development_dependency 'tins', '~> 1.6.0'
     s.add_development_dependency 'json', '~> 1.8'
   end
