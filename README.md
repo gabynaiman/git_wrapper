@@ -1,10 +1,10 @@
 # GitWrapper
 
-[![Gem Version](https://badge.fury.io/rb/git_wrapper.png)](https://rubygems.org/gems/git_wrapper)
-[![Build Status](https://travis-ci.org/gabynaiman/git_wrapper.png?branch=master)](https://travis-ci.org/gabynaiman/git_wrapper)
-[![Coverage Status](https://coveralls.io/repos/gabynaiman/git_wrapper/badge.png?branch=master)](https://coveralls.io/r/gabynaiman/git_wrapper?branch=master)
-[![Code Climate](https://codeclimate.com/github/gabynaiman/git_wrapper.png)](https://codeclimate.com/github/gabynaiman/git_wrapper)
-[![Dependency Status](https://gemnasium.com/gabynaiman/git_wrapper.png)](https://gemnasium.com/gabynaiman/git_wrapper)
+[![Gem Version](https://badge.fury.io/rb/git_wrapper.svg)](https://rubygems.org/gems/git_wrapper)
+[![Build Status](https://travis-ci.org/gabynaiman/git_wrapper.svg?branch=master)](https://travis-ci.org/gabynaiman/git_wrapper)
+[![Coverage Status](https://coveralls.io/repos/gabynaiman/git_wrapper/badge.svg?branch=master)](https://coveralls.io/r/gabynaiman/git_wrapper?branch=master)
+[![Code Climate](https://codeclimate.com/github/gabynaiman/git_wrapper.svg)](https://codeclimate.com/github/gabynaiman/git_wrapper)
+[![Dependency Status](https://gemnasium.com/gabynaiman/git_wrapper.svg)](https://gemnasium.com/gabynaiman/git_wrapper)
 
 Object Oriented git command line wrapper
 
